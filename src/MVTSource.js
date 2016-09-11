@@ -2,6 +2,7 @@ var VectorTile = require('vector-tile').VectorTile;
 var Protobuf = require('pbf');
 var Point = require('point-geometry');
 var Util = require('./MVTUtil');
+L.TileLayer.Canvas = require('./L.TileLayer.Canvas.shim');
 var MVTLayer = require('./MVTLayer');
 
 
@@ -135,8 +136,33 @@ module.exports = L.TileLayer.MVTSource = L.TileLayer.Canvas.extend({
     }
 
   },
+  
+  createTile: function(coords, done){
+      // create a <canvas> element for drawing
+      var tile = L.DomUtil.create('canvas', 'leaflet-tile');
+      // setup tile width and height according to the options
+      var size = this.getTileSize();
+      tile.width = size.x;
+      tile.height = size.y;
+      
+      this._draw({
+        // Most of this library expects "z:x:y".
+        // For specific cases of Leaflet interface, we move "z" to end.
+        id: [coords.z, coords.x, coords.y].join(":"),
+        leafletId: this._tileCoordsToKey(coords),
+        canvas: tile,
+        tile: coords,
+        zoom: coords.z,
+        tileSize: this.options.tileSize
+      });
+      
+      // return the tile so it can be rendered on screen
+      return tile;
+  },
 
   drawTile: function(canvas, tilePoint, zoom) {
+    // TODO: cache key
+    // TODO: DRY
     var ctx = {
       id: [zoom, tilePoint.x, tilePoint.y].join(":"),
       canvas: canvas,
@@ -148,10 +174,14 @@ module.exports = L.TileLayer.MVTSource = L.TileLayer.Canvas.extend({
     //Capture the max number of the tiles to load here. this._tilesToProcess is an internal number we use to know when we've finished requesting PBFs.
     if(this._tilesToProcess < this._tilesToLoad) this._tilesToProcess = this._tilesToLoad;
 
+    // TODO: cache key
     var id = ctx.id = Util.getContextID(ctx);
     this.activeTiles[id] = ctx;
+    debugger;
 
+    // TODO: cache key
     if(!this.processedTiles[ctx.zoom]) this.processedTiles[ctx.zoom] = {};
+    debugger;
 
     if (this.options.debug) {
       this._drawDebugInfo(ctx);
@@ -508,7 +538,9 @@ function getTileURL(lat, lon, zoom) {
 }
 
 function tileLoaded(pbfSource, ctx) {
+  // TODO: cache key [DONE?]
   pbfSource.loadedTiles[ctx.id] = ctx;
+  // debugger;
 }
 
 function parseVT(vt){

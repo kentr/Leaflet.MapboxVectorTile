@@ -111,13 +111,17 @@ MVTFeature.prototype.setStyle = function(styleFn) {
 
 MVTFeature.prototype.draw = function(canvasID) {
   //Get the info from the tiles list
+  // TODO: cache key
   var tileInfo =  this.tiles[canvasID];
+  debugger;
 
   var vtf = tileInfo.vtf;
   var ctx = tileInfo.ctx;
 
   //Get the actual canvas from the parent layer's _tiles object.
+    // TODO: cache key
   var xy = canvasID.split(":").slice(1, 3).join(":");
+  debugger;
   ctx.canvas = this.mvtLayer._tiles[xy];
 
 //  This could be used to directly compute the style function from the layer on every draw.
@@ -157,7 +161,9 @@ MVTFeature.prototype.draw = function(canvasID) {
 
 MVTFeature.prototype.getPathsForTile = function(canvasID) {
   //Get the info from the parts list
+  // TODO: cache key
   return this.tiles[canvasID].paths;
+  debugger;
 };
 
 MVTFeature.prototype.addTileFeature = function(vtf, ctx) {
@@ -171,12 +177,13 @@ MVTFeature.prototype.addTileFeature = function(vtf, ctx) {
 
   this.clearTileFeatures(zoom); //TODO: This iterates thru all tiles every time a new tile is added.  Figure out a better way to do this.
 
+  // TODO: cache key
   this.tiles[ctx.id] = {
     ctx: ctx,
     vtf: vtf,
     paths: []
   };
-
+  debugger;
 };
 
 
@@ -187,6 +194,7 @@ MVTFeature.prototype.addTileFeature = function(vtf, ctx) {
  */
 MVTFeature.prototype.clearTileFeatures = function(zoom) {
   //If stored tiles exist for other zoom levels, expunge them from the list.
+  // TODO: cache key
   for (var key in this.tiles) {
      if(key.split(":")[0] != zoom) delete this.tiles[key];
   }
@@ -249,7 +257,9 @@ MVTFeature.prototype._drawPoint = function(ctx, coordsArray, style) {
   if (!style) return;
   if (!ctx || !ctx.canvas) return;
 
+  // TODO: cache key
   var tile = this.tiles[ctx.id];
+  debugger;
 
   //Get radius
   var radius = 1;
@@ -297,7 +307,9 @@ MVTFeature.prototype._drawLineString = function(ctx, coordsArray, style) {
   ctx2d.beginPath();
 
   var projCoords = [];
+  // TODO: cache key
   var tile = this.tiles[ctx.id];
+  debugger;
 
   for (var gidx in coordsArray) {
     var coords = coordsArray[gidx];
@@ -337,7 +349,9 @@ MVTFeature.prototype._drawPolygon = function(ctx, coordsArray, style) {
   ctx2d.beginPath();
 
   var projCoords = [];
+  // TODO: cache key
   var tile = this.tiles[ctx.id];
+  debugger;
 
   var featureLabel = this.dynamicLabel;
   if (featureLabel) {

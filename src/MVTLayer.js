@@ -116,10 +116,13 @@ module.exports = L.TileLayer.Canvas.extend({
     //We've already got the geom, just get on with the drawing.
     //Need a way to pluck a canvas element from this layer given the parent layer's id.
     //Wait for it to get loaded before proceeding.
+    // TODO: cache key
     var tilePoint = parentCtx.tile;
     var ctx = this._tiles[tilePoint.x + ":" + tilePoint.y];
-
+    debugger;
+    
     if(ctx){
+      // TODO canvas el
       parentCtx.canvas = ctx;
       this.redrawTile(parentCtx.id);
       return;
@@ -130,14 +133,18 @@ module.exports = L.TileLayer.Canvas.extend({
     //This is a timer that will wait for a criterion to return true.
     //If not true within the timeout duration, it will move on.
     waitFor(function () {
+      // TODO: cache key
         ctx = self._tiles[tilePoint.x + ":" + tilePoint.y];
+        debugger;
         if(ctx) {
           return true;
         }
       },
       function(){
         //When it finishes, do this.
+        // TODO: cache key
         ctx = self._tiles[tilePoint.x + ":" + tilePoint.y];
+        debugger;
         parentCtx.canvas = ctx;
         self.redrawTile(parentCtx.id);
 
@@ -149,12 +156,15 @@ module.exports = L.TileLayer.Canvas.extend({
   parseVectorTileLayer: function(vtl, ctx) {
     var self = this;
     var tilePoint = ctx.tile;
-    var layerCtx  = { canvas: null, id: ctx.id, tile: ctx.tile, zoom: ctx.zoom, tileSize: ctx.tileSize};
-
+    // TODO: cache key [DONE?]
+    var layerCtx = L.extend({}, ctx, {canvas: null});
+    
     //See if we can pluck the child tile from this PBF tile layer based on the master layer's tile id.
-    layerCtx.canvas = self._tiles[tilePoint.x + ":" + tilePoint.y];
+    // TODO: cache key [DONE?]
+    // TODO: canvas el [DONE?]
 
-
+    layerCtx.canvas = self._tiles[ctx.leafletId].el;
+    debugger;
 
     //Initialize this tile's feature storage hash, if it hasn't already been created.  Used for when filters are updated, and features are cleared to prepare for a fresh redraw.
     if (!this._canvasIDToFeatures[layerCtx.id]) {
@@ -246,7 +256,9 @@ module.exports = L.TileLayer.Canvas.extend({
     }
     var z = this.map.getZoom();
     for (var key in this._tiles) {
+      // TODO: cache key
       var id = z + ':' + key;
+      debugger;
       this.redrawTile(id);
     }
   },
@@ -290,9 +302,13 @@ module.exports = L.TileLayer.Canvas.extend({
   //This is the old way.  It works, but is slow for mouseover events.  Fine for click events.
   handleClickEvent: function(evt, cb) {
     //Click happened on the GroupLayer (Manager) and passed it here
+    // TODO: cache key
     var tileID = evt.tileID.split(":").slice(1, 3).join(":");
+    debugger;
     var zoom = evt.tileID.split(":")[0];
+    // TODO: canvas el
     var canvas = this._tiles[tileID];
+    debugger; 
     if(!canvas) (cb(evt)); //break out
     var x = evt.layerPoint.x - canvas._leaflet_pos.x;
     var y = evt.layerPoint.y - canvas._leaflet_pos.y;
@@ -363,15 +379,18 @@ module.exports = L.TileLayer.Canvas.extend({
     cb(evt);
   },
 
-  clearTile: function(id) {
+  clearTile: function(canvasId) {
     //id is the entire zoom:x:y.  we just want x:y.
-    var ca = id.split(":");
-    var canvasId = ca[1] + ":" + ca[2];
+    // TODO: cache key
+    debugger;
     if (typeof this._tiles[canvasId] === 'undefined') {
       console.error("typeof this._tiles[canvasId] === 'undefined'");
       return;
     }
-    var canvas = this._tiles[canvasId];
+    
+    // TODO: cache key
+    var canvas = this._tiles[canvasId].el;
+    debugger;
 
     var context = canvas.getContext('2d');
     context.clearRect(0, 0, canvas.width, canvas.height);

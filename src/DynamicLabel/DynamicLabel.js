@@ -82,6 +82,7 @@ DynamicLabel.prototype._determineActiveTiles = function() {
 
   for (var x = minX; x <= maxX; x++) {
     for (var y = minY; y <= maxY; y++) {
+      // TODO: cache key
       activeTiles[z+':'+x+':'+y] = true;
     }
   }
